@@ -1,0 +1,110 @@
+﻿﻿@page "/AdmissionForm"
+@using WebApiGrey.Shared;
+@inject HttpClient Http
+@inject NavigationManager nvm
+
+
+<EditForm Model="@student" OnValidSubmit="@HandleOnSubmit">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+
+    <label>
+        Enter Student Id :
+        <InputNumber  @bind-Value="student.Id" />
+    </label>
+    <br>
+     <label>
+        Enter Student Name :
+        <InputText  @bind-Value="student.Name" />
+    </label>
+    <br>
+    <label>
+        Enter Roll Number:
+        <InputText @bind-Value="student.RollNumber" />
+    </label>
+    <br>
+     <label>
+        Enter Student DOB :
+        <InputDate @bind-Value="student.DOB" />
+    </label>
+    <br>
+    <button type="submit" >Submit</button>
+
+
+
+</EditForm>
+
+<p>@message</p>
+
+<table>
+
+    <thead>Id</thead>
+    <thead>Name</thead>
+    <thead>Roll</thead>
+
+
+ @foreach(Student std  in students )
+{
+    <tr>
+        <td>@std.Id</td>
+        <td>@std.Name</td>
+        <td>@std.RollNumber</td>
+    </tr>
+
+
+
+}
+</table>
+<GreySectionComp.Components.StudentComp student="@student" />
+
+
+
+@code {
+
+    Student student = new Student()
+    {
+        DOB=DateTime.Now
+    };
+
+
+    List<Student> students = new List<Student>();
+    string message = "";
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        students =  await Http.GetFromJsonAsync<List<Student>>("/pass");
+        //        var students = _dbcontext.Students. (x=>x.RollNumber).Skip(1).Take(1);
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        students = await Http.GetFromJsonAsync<List<Student>>("/pass");
+
+    }
+
+
+
+
+    async void HandleOnSubmit()
+    {
+
+        var res = await Http.PostAsJsonAsync("/api/v1/Student", student);
+        if(res.IsSuccessStatusCode)
+        {
+
+            message = res.ToString();
+            //nvm.NavigateTo("/Stdform");
+
+            
+        }
+        StateHasChanged();
+
+    }
+
+
+}
